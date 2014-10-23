@@ -162,21 +162,27 @@ NativeModulePtr makeNativeModule( ExecutableContainer *exc,
   }
 
   if(IgnoreNativeEntryPoints == false) {
-    //get entry points from the file too
-    list<pair<string, boost::uint64_t> > tmp;
-    exc->get_exports(tmp);
+      //get entry points from the file too
+      list<pair<string, boost::uint64_t> > tmp;
+      exc->get_exports(tmp);
 
-    for(list<pair<string, boost::uint64_t> >::iterator it = tmp.begin(), e = tmp.end();
-        it != e;
-        ++it)
-    {
-      entrySymbols.push_back(
-              NativeModule::EntrySymbol(
-                  it->first,
-                  it->second));
-      entryPoints.push_back(it->second);
-    }
+      for(list<pair<string, boost::uint64_t> >::iterator it = tmp.begin(), e = tmp.end();
+              it != e;
+              ++it)
+      {
+          entrySymbols.push_back(
+                  NativeModule::EntrySymbol(
+                      it->first,
+                      it->second));
+          entryPoints.push_back(it->second);
+      }
+
+      ::uint64_t file_ep;
+      if(exc->getEntryPoint(file_ep)) {
+          entryPoints.push_back(file_ep);
+      }
   }
+
 
   if(entryPoints.size() == 0) {
     throw LErr(__LINE__, __FILE__, "No good entry points found or supplied");
@@ -191,6 +197,8 @@ NativeModulePtr makeNativeModule( ExecutableContainer *exc,
   set<VA> visited;
   //now, get functions for these entry points with this executable 
   //context
+  outs() << "We have " << entryPoints.size() << " entry points\n";
+
   for(list<boost::uint64_t>::iterator it = entryPoints.begin(), e = entryPoints.end();
       it != e;
       ++it)
@@ -264,13 +272,6 @@ int main(int argc, char *argv[]) {
   llvm::InitializeAllAsmParsers();
   llvm::InitializeAllDisassemblers();
 
-  //sanity
-  if(EntrySymbol.size() == 0 && EntryPoint.size() == 0) {
-    //One of these must be set
-    llvm::errs() << "Must specify at least one entry point via -entry-symbol or -e\n";
-    return -1;
-  }
-
   ExternalFunctionMap funcs(TargetTriple);
   try {
 
@@ -325,6 +326,19 @@ int main(int argc, char *argv[]) {
       errs() << "Could not open: " << InputFilename << "\n";
       return -1;
   }
+
+  //sanity
+  if(EntrySymbol.size() == 0 && EntryPoint.size() == 0) {
+      ::uint64_t file_ep;
+      // maybe this file format specifies an entry point?
+      if(false == exc->getEntryPoint(file_ep)) {
+          //We don't know which entry point to use!
+          llvm::errs() << "Could not identify an entry point for: [" << InputFilename << "].\n";
+          llvm::errs() << "You must manually specify at least one entry point. Use either -entry-symbol or -e.\n";
+          return -1;
+      }
+  }
+
 
   if(exc->is_open()) {
     //convert to native CFG
