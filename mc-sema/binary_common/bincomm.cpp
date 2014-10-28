@@ -135,8 +135,10 @@ ExecutableContainer *ExecutableContainer::open(string f, const Target *T, string
 
   else {
   Disassembly disasm;
+
   fstream input(PK.c_str(), ios::in | ios::binary);
   if (!disasm.ParseFromIstream(&input)) {
+  //if (!disasm.ParseFromFileDescriptor(&input)) {
     throw LErr(__LINE__, __FILE__, "Failed to parse facts.");
   }
   exc->disassembly = &disasm;

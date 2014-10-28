@@ -21,7 +21,8 @@ message Instruction {
     optional    JumpTbl           jump_table = 10;
     optional    JumpIndexTbl      jump_index_table = 11;
     optional    string            ext_data_name = 12;
-}
+    repeated    Edge_64 	  target_to = 13; 
+    }
 
 message Block {
     repeated    Instruction insts = 1;

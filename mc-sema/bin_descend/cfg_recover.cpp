@@ -636,6 +636,37 @@ static bool handlePossibleJumpTable(ExecutableContainer *c,
 }
 
 
+static bool lookUpJump(ExecutableContainer *c,
+        NativeBlockPtr B,
+        InstPtr jmpinst, 
+        VA curAddr, 
+        stack<VA> &funcs,
+        stack<VA> &blockChildren,
+        raw_ostream &out) {
+
+  bool did_find = false; 
+    if(c->disassembly != NULL){
+      Disassembly * disasm = c->disassembly;
+      for (int i = 0; i < disasm->branch_instr_size(); i++) {
+	const Annotated_Branch_Instruction& branch = disasm->branch_instr(i);
+	const Annotated_Instruction& annotated = branch.instr();
+	
+	if(annotated.inst_addr() == curAddr) {
+	  out << "Found: " << annotated.instr_string() << "\n";
+	  did_find = true;
+	}
+
+	out << "Name: " << branch.branch_instr_name() << "\n";
+	out << "Instruction length: " << annotated.inst_len() << "\n";
+	out << "Instruction Name: " << annotated.instr_name() << "\n";
+	out << "Operand Count: " << annotated.op_count() << "\n";
+	out << "Instruction Address: " << annotated.inst_addr_hex() << "\n";
+      }
+    }
+    return did_find;
+}
+
+
 static bool handleJump(ExecutableContainer *c,
         NativeBlockPtr B,
         InstPtr jmpinst, 
@@ -644,15 +675,25 @@ static bool handleJump(ExecutableContainer *c,
         stack<VA> &blockChildren,
         raw_ostream &out) {
 
+  bool did_jmptable = false;
+  bool did_lookup = false; 
+  bool did_funcstub = false; 
+
   // this is an internal jmp. probably a jump table.
   out << "Found a possible jump table!\n";
-  bool did_jmptable = handlePossibleJumpTable(c, B, jmpinst, curAddr, funcs, blockChildren, out); 
+  did_jmptable = handlePossibleJumpTable(c, B, jmpinst, curAddr, funcs, blockChildren, out); 
 
   if(!did_jmptable) {
     out << "Heristic jumptable processing couldn't parse jumptable\n";
     out << "pointing to: 0x" << to_string<VA>(curAddr, hex) << "\n";
     out << jmpinst->printInst() << "\n";
     out << c->hash << "\n";
+    bool did_lookup = lookUpJump(c, B, jmpinst, curAddr, funcs, blockChildren, out);
+  }
+
+  if(!did_lookup) {
+    out << "Did find not any information for possible jump targets \n";
+    out << "Recording the need to create LLLM function stubs\n";
   }
   return did_jmptable;
 
