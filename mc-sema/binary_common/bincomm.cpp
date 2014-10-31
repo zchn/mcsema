@@ -130,7 +130,7 @@ ExecutableContainer *ExecutableContainer::open(string f, const Target *T, string
 
   if(PK == "") {
       outs() << "Disassembly not guided by outside facts.\nUse: -p <protobuff>' to feed information to guide the disassembly\n";
-  exc->disassembly = NULL;
+      //  exc->disassembly = NULL;
   }
 
   else {
@@ -138,10 +138,9 @@ ExecutableContainer *ExecutableContainer::open(string f, const Target *T, string
 
   fstream input(PK.c_str(), ios::in | ios::binary);
   if (!disasm.ParseFromIstream(&input)) {
-  //if (!disasm.ParseFromFileDescriptor(&input)) {
     throw LErr(__LINE__, __FILE__, "Failed to parse facts.");
   }
-  exc->disassembly = &disasm;
+  exc->disassembly = disasm;
  }
 
 

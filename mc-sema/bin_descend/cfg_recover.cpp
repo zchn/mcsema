@@ -645,24 +645,39 @@ static bool lookUpJump(ExecutableContainer *c,
         raw_ostream &out) {
 
   bool did_find = false; 
-    if(c->disassembly != NULL){
-      Disassembly * disasm = c->disassembly;
-      for (int i = 0; i < disasm->branch_instr_size(); i++) {
-	const Annotated_Branch_Instruction& branch = disasm->branch_instr(i);
-	const Annotated_Instruction& annotated = branch.instr();
-	
-	if(annotated.inst_addr() == curAddr) {
-	  out << "Found: " << annotated.instr_string() << "\n";
-	  did_find = true;
-	}
+  //    if(c->disassembly != NULL){
+      Disassembly disasm = c->disassembly;
+      for (int i = 0; i < disasm.branch_insts_size(); i++) {
+	const Annotated_Branch_Instruction& branch = disasm.branch_insts(i);
+	const Annotated_Instruction& annotated = branch.inst();
 
-	out << "Name: " << branch.branch_instr_name() << "\n";
-	out << "Instruction length: " << annotated.inst_len() << "\n";
-	out << "Instruction Name: " << annotated.instr_name() << "\n";
-	out << "Operand Count: " << annotated.op_count() << "\n";
-	out << "Instruction Address: " << annotated.inst_addr_hex() << "\n";
+	uint64_t n_target = branch.target_to_size();
+	out << "has " << n_target << " targets" << "\n";
+	out << "Indirect: "<< branch.is_indirect() << "\n"; 
+	out << "Resolved: "<< branch.is_resolved() << "\n"; 
+	out << "Leaf: "<< branch.is_leaf() << "\n"; 
+
+
+	// if(static_cast<uint32_t>(annotated.inst_addr()) == curAddr) {
+	//   out << "Found" << "\n";
+	//   // out << "Found: " << annotated.instr_string() << "\n";
+	//   // did_find = true;
+	// }
+	
+	// if(branch.is_indirect() == true && branch.is_resolved() == true) {
+	//   uint64_t n_target = branch.target_to_size();
+	//   bool is_leaf = branch.is_leaf();
+	//   out << "Found resolved indirect jump" << "\n";
+	//   out << "has " << n_target << " targets" << "\n";
+	// }
+	//out << "Name: "  << "\n";
+	//out << "Instruction Name: " << static_cast<std::string> annotated.instr_name() << "\n";
+	//out << "Instruction Address: " << static_cast<std::string> annotated.inst_addr_hex() << "\n";
+	//	out << "Instruction length: " << annotated.inst_len() << "\n";
+	//	out << "Operand Count: " << annotated.op_count() << "\n";
+
       }
-    }
+    
     return did_find;
 }
 
@@ -688,7 +703,7 @@ static bool handleJump(ExecutableContainer *c,
     out << "pointing to: 0x" << to_string<VA>(curAddr, hex) << "\n";
     out << jmpinst->printInst() << "\n";
     out << c->hash << "\n";
-    bool did_lookup = lookUpJump(c, B, jmpinst, curAddr, funcs, blockChildren, out);
+    did_lookup = lookUpJump(c, B, jmpinst, curAddr, funcs, blockChildren, out);
   }
 
   if(!did_lookup) {

@@ -99,7 +99,7 @@ public:
 
   virtual std::string name(void) = 0;
   std::string hash;
-  Disassembly *disassembly;
+  Disassembly disassembly;
 
   virtual uint64_t getBase() const = 0;
   virtual uint64_t getExtent() const = 0;
