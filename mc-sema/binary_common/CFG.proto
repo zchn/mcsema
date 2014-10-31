@@ -1,3 +1,8 @@
+//package ControlFlowGraph;
+
+//option java_package = "org.jakstab.tob.mcsema";
+//option java_outer_classname = "CFG";
+
 message JumpTbl {
     repeated    int64       table_entries = 1;
     required    int32       zero_offset = 2;
@@ -21,8 +26,7 @@ message Instruction {
     optional    JumpTbl           jump_table = 10;
     optional    JumpIndexTbl      jump_index_table = 11;
     optional    string            ext_data_name = 12;
-    repeated    Edge_64 	  target_to = 13; 
-    }
+}
 
 message Block {
     repeated    Instruction insts = 1;
@@ -149,20 +153,20 @@ jCcxz = 22;
 ret = 23;
 call = 24; 
 }
-required Branch branch_instr_name = 1;
-required bool   is_resolved = 2; 
+required Branch inst_name = 1;
+required bool  is_resolved = 2; 
 required bool  is_indirect = 3;
 required bool is_conditional = 4;
 required bool is_leaf = 5;
 repeated Edge_64 target_to = 6; 
-required Annotated_Instruction instr = 7; 
+required Annotated_Instruction inst = 7; 
 optional string abstract_expression = 8;	
 }
 
 
 message Annotated_Instruction {
-required string instr_name = 1;
-required string instr_string = 2;
+required string inst_name = 1;
+required string inst_string = 2;
 required int64  inst_addr = 3;
 required int32  inst_len = 4; 
 required int32  op_count = 5; 
@@ -282,9 +286,9 @@ repeated Edge_64 calls = 9;
 
 
 message Disassembly {
-repeated Annotated_Instruction instr = 1;
-repeated Annotated_Branch_Instruction branch_instr = 2;
-repeated Annotated_Register_32 reg_32 = 3;
-repeated Annotated_Register_64 reg_64 = 4;
-repeated Annotated_Function func = 5;
+repeated Annotated_Instruction insts = 1;
+repeated Annotated_Branch_Instruction branch_insts = 2;
+repeated Annotated_Register_32 reg_32s = 3;
+repeated Annotated_Register_64 reg_64s = 4;
+repeated Annotated_Function funcs = 5;
 }
