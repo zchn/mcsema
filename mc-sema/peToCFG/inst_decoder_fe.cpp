@@ -105,7 +105,7 @@ InstPtr LLVMByteDecoder::getInstFromBuff(VA addr, llvm::MemoryObject *bmo) {
           nextVA += oper.getImm() + insLen;
           inst->set_tr(nextVA);
         } else {
-          throw LErr(__LINE__, __FILE__, "Indirect branches not there yet");
+         throw LErr(__LINE__, __FILE__, "Indirect branches not there yet");
         }
         break;
       case X86::LOOP:

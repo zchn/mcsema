@@ -389,7 +389,7 @@ static int addJmpTableEntries(ExecutableContainer *c,
                 ExecutableContainer::CodeSection);
 
         if(!is_reloc_code) {
-            // jump table entry not point to code
+            // jump table entry does not point to code
             out << "Jump table search ending, addr " << to_string<VA>(curAddr, hex) << " doesn't point to code\n";
             break;
         }
@@ -636,7 +636,48 @@ static bool handlePossibleJumpTable(ExecutableContainer *c,
 }
 
 
-static bool lookUpJump(ExecutableContainer *c,
+
+static int addJmpTargets(ExecutableContainer *c, 
+        vector<VA> &new_funcs,
+        VA curAddr, 
+        int increment,
+        raw_ostream &out) {
+
+    int num_funcs_added = 0;
+
+    while(true) {
+         
+        VA  someFunction;
+        curAddr += increment;
+
+        if(!c->relocate_addr(curAddr, someFunction)) {
+            // could not relocate the default jump table entry.
+            // not good
+            out << "Jump table search ending, can't relocate address: " << to_string<VA>(curAddr, hex) << "\n";
+            break;
+        }
+
+        bool is_reloc_code = isAddrOfType(c, someFunction, 
+                ExecutableContainer::CodeSection);
+
+        if(!is_reloc_code) {
+            // jump table entry does not point to code
+            out << "Jump table search ending, addr " << to_string<VA>(curAddr, hex) << " doesn't point to code\n";
+            break;
+        }
+
+        num_funcs_added += 1;
+        out << "Added JMPTABLE entry [" << to_string<VA>(curAddr, hex) 
+            << "] => " << to_string<VA>(someFunction, hex)  << "\n";
+        new_funcs.push_back(someFunction);
+
+    }
+
+    return num_funcs_added;
+}
+
+
+static bool handlePossibleJumpTargets(ExecutableContainer *c,
         NativeBlockPtr B,
         InstPtr jmpinst, 
         VA curAddr, 
@@ -644,41 +685,166 @@ static bool lookUpJump(ExecutableContainer *c,
         stack<VA> &blockChildren,
         raw_ostream &out) {
 
-  bool did_find = false; 
-  //    if(c->disassembly != NULL){
-      Disassembly disasm = c->disassembly;
-      for (int i = 0; i < disasm.branch_insts_size(); i++) {
-	const Annotated_Branch_Instruction& branch = disasm.branch_insts(i);
-	const Annotated_Instruction& annotated = branch.inst();
-
-	uint64_t n_target = branch.target_to_size();
-	out << "has " << n_target << " targets" << "\n";
-	out << "Indirect: "<< branch.is_indirect() << "\n"; 
-	out << "Resolved: "<< branch.is_resolved() << "\n"; 
-	out << "Leaf: "<< branch.is_leaf() << "\n"; 
+    LASSERT(jmpinst->get_inst().getOpcode() == X86::JMP32m, 
+            "handlePossibleJumpTable needs a JMP32m opcode"  );
 
 
-	// if(static_cast<uint32_t>(annotated.inst_addr()) == curAddr) {
-	//   out << "Found" << "\n";
-	//   // out << "Found: " << annotated.instr_string() << "\n";
-	//   // did_find = true;
-	// }
-	
-	// if(branch.is_indirect() == true && branch.is_resolved() == true) {
-	//   uint64_t n_target = branch.target_to_size();
-	//   bool is_leaf = branch.is_leaf();
-	//   out << "Found resolved indirect jump" << "\n";
-	//   out << "has " << n_target << " targets" << "\n";
-	// }
-	//out << "Name: "  << "\n";
-	//out << "Instruction Name: " << static_cast<std::string> annotated.instr_name() << "\n";
-	//out << "Instruction Address: " << static_cast<std::string> annotated.inst_addr_hex() << "\n";
-	//	out << "Instruction length: " << annotated.inst_len() << "\n";
-	//	out << "Operand Count: " << annotated.op_count() << "\n";
+    VA reloc_offset = jmpinst->get_reloc_offset();
 
-      }
+    VA addrInInst = curAddr + reloc_offset;
+    VA jmpTableEntry, someFunction;
+    if(!c->relocate_addr(addrInInst, jmpTableEntry)) {
+        out << "Not a jump table: can't relocate relocation in JMP32m\n";
+        // can't relocate, something bad happened
+       return false; 
+    }
+
+    if(!c->relocate_addr(jmpTableEntry, someFunction)) {
+        // could not relocate the default jump table entry.
+        // not good
+        out << "Not a jump table: can't relocate first jump table entry\n";
+        return false;
+    }
+
+    bool is_reloc_code = isAddrOfType(c, someFunction, ExecutableContainer::CodeSection);
+    if(!is_reloc_code) {
+        // jump table entry not point to code
+        out << "Not a jump table: first entry doesn't point to code\n";
+        return false;
+    }
+     
+
+    // read jump table entries and add them as new function
+    // entry points
+    vector<VA>  jmptable_entries; 
+    int new_funs;
+    int original_zero;
+
+    // this reads negative jump table indexes, but vectors are not negative
+    // indexed. the negative most, which should be the new index 0, is now
+    // index N. Reverse the vector so it will be index 0, and save the current
+    // size as the original zeroth element
+    new_funs = addJmpTargets(c, jmptable_entries, jmpTableEntry,  -4, out);
+    std::reverse(jmptable_entries.begin(), jmptable_entries.end());
+    out << "Added: " << to_string<int>(new_funs, dec) << " functions to jmptable\n";
+
+    original_zero = new_funs;
+
+    // add original entry at the zero position
+    jmptable_entries.push_back(someFunction);
+    out << "Added JMPTABLE entry [" << to_string<uint32_t>(jmpTableEntry, hex) 
+        << "] => " << to_string<uint32_t>(someFunction, hex)  << "\n";
+
+    // add the positive table entries
+    new_funs = addJmpTableEntries(c, jmptable_entries, jmpTableEntry,  4, out);
+    out << "Added: " << to_string<int>(new_funs, dec) << " functions to jmptable\n";
+
+    // // associate instruction with jump table
+    // JumpTable *jt = new JumpTable(jmptable_entries, original_zero);
+    // jmpinst->set_jump_table(JumpTablePtr(jt));
+
+    // stack<VA> *toPush = NULL;
+
+    // // if this jump table is in the format
+    // // jmp [reg*4+imm32], then it is conformant
+    // // and we can turn it into an llvm switch();
+    // bool is_conformant = isConformantJumpInst(jmpinst);
+    // if(is_conformant) {
+    //     toPush = &blockChildren;
+    //     out << "GOT A CONFORMANT JUMP INST\n";
+    // } else {
+    //     toPush = &funcs;
+    // }
+
+    stack<VA> *toPush = NULL;
+    toPush = &funcs;
     
-    return did_find;
+
+    // add these jump table entries as new entry points
+    for(std::vector<VA>::const_iterator itr = jmptable_entries.begin();
+            itr != jmptable_entries.end();
+            itr++) 
+    {
+        out << "Adding block via jmptable: " << to_string<VA>(*itr, hex) << "\n";
+        toPush->push(*itr);
+        // if(is_conformant) {
+        //     B->add_follow(*itr);
+        // }
+    }
+
+    //    processJumpIndexTable(c, B, jmpinst, jmptable_entries, out);
+
+    return true;
+
+}
+
+
+static bool processResolvedIndirectJump(ExecutableContainer *c,
+					const Annotated_Branch_Instruction& branch,
+					NativeBlockPtr B,
+					InstPtr jmpinst, 
+					VA curAddr, 
+					stack<VA> &funcs,
+					stack<VA> &blockChildren,
+					raw_ostream &out) {
+
+  const Annotated_Instruction& annotated = branch.inst();
+  uint64_t n_target = branch.target_to_size();
+
+  out << "Found: " << annotated.inst_string() << "\n";
+  out << "has " << n_target << " targets" << "\n";
+  out << "Indirect: "<< branch.is_indirect() << "\n"; 
+  out << "Resolved: "<< branch.is_resolved() << "\n"; 
+  out << "Leaf: "<< branch.is_leaf() << "\n"; 
+
+  vector<VA>  jmp_targets;
+  out << "Found targets" << "\n";
+  out << "--------------------" << "\n";
+
+  for (int i = 0; i < branch.target_to_size(); i++) {
+    const Edge_64& target = branch.target_to(i);
+    out << "going to: 0x" << to_string<VA>(target.value(), hex) << "\n";
+    jmp_targets.push_back(target.value());
+    funcs.push(target.value());
+    // TODO
+    // Now check to see if we point to code
+    // Check if this code is a new function. In other words, we are discovery the function now.
+    // Check if we have already discovered this function
+    // Otherwise, start to see if we jumping to the middle of a function.
+    // Check if the target is code within an new function
+    // Check that it points to code within an already discovered function
+      
+
+  }
+
+  return true;
+
+}
+
+
+
+static bool lookUpJump(ExecutableContainer *c,
+		       NativeBlockPtr B,
+		       InstPtr jmpinst, 
+		       VA curAddr, 
+		       stack<VA> &funcs,
+		       stack<VA> &blockChildren,
+		       raw_ostream &out) {
+
+  bool did_find = false; 
+  Disassembly disasm = c->disassembly;
+  for (int i = 0; i < disasm.branch_insts_size(); i++) {
+    const Annotated_Branch_Instruction& branch = disasm.branch_insts(i);
+    const Annotated_Instruction& annotated = branch.inst();
+
+    if(annotated.inst_addr() == curAddr) {
+      if(branch.is_indirect() == true && branch.is_resolved() == true) {
+	did_find = processResolvedIndirectJump(c, branch, B, jmpinst, curAddr, funcs, blockChildren, out);
+      }
+    }
+  }
+  
+  return did_find;
 }
 
 
@@ -693,6 +859,7 @@ static bool handleJump(ExecutableContainer *c,
   bool did_jmptable = false;
   bool did_lookup = false; 
   bool did_funcstub = false; 
+  bool did_work = false;
 
   // this is an internal jmp. probably a jump table.
   out << "Found a possible jump table!\n";
@@ -700,17 +867,17 @@ static bool handleJump(ExecutableContainer *c,
 
   if(!did_jmptable) {
     out << "Heristic jumptable processing couldn't parse jumptable\n";
-    out << "pointing to: 0x" << to_string<VA>(curAddr, hex) << "\n";
-    out << jmpinst->printInst() << "\n";
-    out << c->hash << "\n";
     did_lookup = lookUpJump(c, B, jmpinst, curAddr, funcs, blockChildren, out);
   }
 
   if(!did_lookup) {
-    out << "Did find not any information for possible jump targets \n";
+    out << "Did not find information for possible jump targets \n";
     out << "Recording the need to create LLLM function stubs\n";
   }
-  return did_jmptable;
+  out << "For: 0x" << to_string<VA>(curAddr, hex) << "\n";
+  out << jmpinst->printInst() << "\n";
+  
+  return did_jmptable || did_lookup;
 
 }
 

@@ -127,19 +127,20 @@ ExecutableContainer *ExecutableContainer::open(string f, const Target *T, string
   }
 
   exc->hash = hash;
+  Disassembly disasm;
 
-  if(PK == "") {
+  if(PK != "") {
+  fstream input(PK.c_str(), ios::in | ios::binary);
+  outs() << PK << "\n";
+  if (!disasm.ParseFromIstream(&input)) {
+    throw LErr(__LINE__, __FILE__, "Failed to parse facts.");
+  }
+
+  else {
       outs() << "Disassembly not guided by outside facts.\nUse: -p <protobuff>' to feed information to guide the disassembly\n";
       //  exc->disassembly = NULL;
   }
 
-  else {
-  Disassembly disasm;
-
-  fstream input(PK.c_str(), ios::in | ios::binary);
-  if (!disasm.ParseFromIstream(&input)) {
-    throw LErr(__LINE__, __FILE__, "Failed to parse facts.");
-  }
   exc->disassembly = disasm;
  }
 

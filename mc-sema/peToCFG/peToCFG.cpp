@@ -327,17 +327,17 @@ InstPtr deserializeInst(const ::Instruction &inst, LLVMByteDecoder &decoder)
   }
 
 
-  if(inst.has_target_to()) {
-      // create new indirect branch
-    //      JumpTable *jmp = new JumpTable(table_entries, jmp_tbl.zero_offset());
-    //ip->set_jump_table(JumpTablePtr(jmp));
-  }
+  // if(inst.has_target_to()) {
+  //     // create new indirect branch
+  //   //      JumpTable *jmp = new JumpTable(table_entries, jmp_tbl.zero_offset());
+  //   //ip->set_jump_table(JumpTablePtr(jmp));
+  // }
 
-  if(inst.has_referered_from()) {
-      // create new label that branch can refered to for jumps
-    //      JumpTable *jmp = new JumpTable(table_entries, jmp_tbl.zero_offset());
-    //ip->set_jump_table(JumpTablePtr(jmp));
-  }
+  // if(inst.has_referered_from()) {
+  //     // create new label that branch can refered to for jumps
+  //   //      JumpTable *jmp = new JumpTable(table_entries, jmp_tbl.zero_offset());
+  //   //ip->set_jump_table(JumpTablePtr(jmp));
+  // }
 
 
 
