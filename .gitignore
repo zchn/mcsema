@@ -11,6 +11,8 @@ __pycache__/
 \.class$
 ^.settings
 
+.idea/
+
 # emacs saved files 
 *.py~
 *.~
