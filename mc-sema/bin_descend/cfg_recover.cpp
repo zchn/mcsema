@@ -803,9 +803,11 @@ static bool processResolvedIndirectJump(ExecutableContainer *c,
 
   for (int i = 0; i < branch.target_to_size(); i++) {
     const Edge_64& target = branch.target_to(i);
-    out << "going to: 0x" << to_string<VA>(target.value(), hex) << "\n";
-    jmp_targets.push_back(target.value());
+    VA target_location = target.value();
+    out << "going to: 0x" << to_string<VA>(target_location, hex) << "\n";
+    jmp_targets.push_back(target_location);
     funcs.push(target.value());
+    jmpinst->set_resolved_jump_tgt(target_location);
     // TODO
     // Now check to see if we point to code
     // Check if this code is a new function. In other words, we are discovery the function now.

@@ -408,6 +408,13 @@ static InstTransResult translate_JMP32m(NativeModulePtr natM, BasicBlock *& bloc
         doJumpTableViaSwitch(natM, block, ip, inst);
         return EndBlock;
 
+    } else if(ip->has_resolved_jump_tgt()) {
+
+        std::string msg("Found a jump with a resolved target: ");
+        
+        msg += to_string<VA>(ip->get_loc(), std::hex);
+        throw TErr(__LINE__, __FILE__, msg.c_str());
+        return EndBlock;
     } else {
         
         std::string msg("NIY: JMP32m only supported for external API calls and jump tables: ");

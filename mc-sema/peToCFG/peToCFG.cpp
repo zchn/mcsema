@@ -777,6 +777,8 @@ static void instFromNatInst(InstPtr i, ::Instruction *protoInst) {
   vector<boost::uint8_t>  bytes = i->get_bytes();
   protoInst->set_inst_bytes(string(bytes.begin(), bytes.end()));
 
+
+
   /* add the instruction address */
   protoInst->set_inst_addr(i->get_loc());
 
@@ -838,8 +840,22 @@ static void instFromNatInst(InstPtr i, ::Instruction *protoInst) {
       proto_idx->set_zero_offset(native_idx->getInitialEntry());
   }
 
+  if(i->has_resolved_jump_tgt()) {
+
+    const vector<VA>& the_targets = i->resolved_targets;
+    vector<VA>::const_iterator it = the_targets.begin();
+    while(it != the_targets.end()) {
+      int32_t jmp_t = *it;
+      cout << jmp_t << "\n";
+      protoInst->add_target_to(jmp_t);
+      ++it;
+    }
+
+      
+  }
   return;
 }
+
 
 static void blockFromNatBlock(NativeBlockPtr b, ::Block *protoBlock) {
   /* add the base address */

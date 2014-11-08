@@ -602,6 +602,18 @@ class Instruction : public ::google::protobuf::Message {
   inline ::std::string* release_ext_data_name();
   inline void set_allocated_ext_data_name(::std::string* ext_data_name);
 
+  // repeated int64 target_to = 13;
+  inline int target_to_size() const;
+  inline void clear_target_to();
+  static const int kTargetToFieldNumber = 13;
+  inline ::google::protobuf::int64 target_to(int index) const;
+  inline void set_target_to(int index, ::google::protobuf::int64 value);
+  inline void add_target_to(::google::protobuf::int64 value);
+  inline const ::google::protobuf::RepeatedField< ::google::protobuf::int64 >&
+      target_to() const;
+  inline ::google::protobuf::RepeatedField< ::google::protobuf::int64 >*
+      mutable_target_to();
+
   // @@protoc_insertion_point(class_scope:Instruction)
  private:
   inline void set_has_inst_bytes();
@@ -643,9 +655,10 @@ class Instruction : public ::google::protobuf::Message {
   ::JumpTbl* jump_table_;
   ::JumpIndexTbl* jump_index_table_;
   ::std::string* ext_data_name_;
+  ::google::protobuf::RepeatedField< ::google::protobuf::int64 > target_to_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(12 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
 
   friend void  protobuf_AddDesc_CFG_2eproto();
   friend void protobuf_AssignDesc_CFG_2eproto();
@@ -3949,6 +3962,31 @@ inline void Instruction::set_allocated_ext_data_name(::std::string* ext_data_nam
     clear_has_ext_data_name();
     ext_data_name_ = const_cast< ::std::string*>(&::google::protobuf::internal::kEmptyString);
   }
+}
+
+// repeated int64 target_to = 13;
+inline int Instruction::target_to_size() const {
+  return target_to_.size();
+}
+inline void Instruction::clear_target_to() {
+  target_to_.Clear();
+}
+inline ::google::protobuf::int64 Instruction::target_to(int index) const {
+  return target_to_.Get(index);
+}
+inline void Instruction::set_target_to(int index, ::google::protobuf::int64 value) {
+  target_to_.Set(index, value);
+}
+inline void Instruction::add_target_to(::google::protobuf::int64 value) {
+  target_to_.Add(value);
+}
+inline const ::google::protobuf::RepeatedField< ::google::protobuf::int64 >&
+Instruction::target_to() const {
+  return target_to_;
+}
+inline ::google::protobuf::RepeatedField< ::google::protobuf::int64 >*
+Instruction::mutable_target_to() {
+  return &target_to_;
 }
 
 // -------------------------------------------------------------------

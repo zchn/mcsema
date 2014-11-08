@@ -135,15 +135,12 @@ ExecutableContainer *ExecutableContainer::open(string f, const Target *T, string
   if (!disasm.ParseFromIstream(&input)) {
     throw LErr(__LINE__, __FILE__, "Failed to parse facts.");
   }
-
+  }
   else {
       outs() << "Disassembly not guided by outside facts.\nUse: -p <protobuff>' to feed information to guide the disassembly\n";
-      //  exc->disassembly = NULL;
   }
 
   exc->disassembly = disasm;
- }
-
 
 
   return exc;

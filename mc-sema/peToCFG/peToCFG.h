@@ -138,6 +138,8 @@ class Inst {
 
     private:
     std::vector<VA>   targets;
+    
+
     std::vector<boost::uint8_t> instBytes;
     VA              tgtIfTrue;
     VA              tgtIfFalse;
@@ -167,6 +169,7 @@ class Inst {
     uint8_t         reloc_offset;
 
     public:
+    std::vector<VA>   resolved_targets;
     std::vector<boost::uint8_t> get_bytes(void) { return this->instBytes; }
     std::string printInst(void) { 
         return this->instRep;
@@ -213,6 +216,11 @@ class Inst {
     void set_call_tgt(VA addr) { this->targets.push_back(addr); return; }
     bool has_call_tgt() { return !this->targets.empty(); }
     VA get_call_tgt(int index) { return this->targets.at(index); }
+
+    void set_resolved_jump_tgt(VA addr) { this->resolved_targets.push_back(addr); return; }
+    bool has_resolved_jump_tgt() { return !this->resolved_targets.empty(); }
+
+    VA get_resolved_jump_tgt(int index) { return this->resolved_targets.at(index); }
 
     void set_ext_call_target(ExternalCodeRefPtr t) { 
         this->extCallTgt = t; 
