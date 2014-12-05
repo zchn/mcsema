@@ -665,7 +665,7 @@ void protobuf_AddDesc_CFG_2eproto() {
     "set\030\t \001(\005\022\034\n\njump_table\030\n \001(\0132\010.JumpTbl\022"
     "\'\n\020jump_index_table\030\013 \001(\0132\r.JumpIndexTbl"
     "\022\025\n\rext_data_name\030\014 \001(\t\022\021\n\ttarget_to\030\r \003"
-    "(\003\"Q\n\005Block\022\033\n\005insts\030\001 \003(\0132\014.Instruction"
+    "(\005\"Q\n\005Block\022\033\n\005insts\030\001 \003(\0132\014.Instruction"
     "\022\024\n\014base_address\030\002 \002(\003\022\025\n\rblock_follows\030"
     "\003 \003(\003\"9\n\010Function\022\026\n\006blocks\030\001 \003(\0132\006.Bloc"
     "k\022\025\n\rentry_address\030\002 \002(\003\"\360\001\n\020ExternalFun"
@@ -1652,19 +1652,19 @@ bool Instruction::MergePartialFromCodedStream(
         break;
       }
 
-      // repeated int64 target_to = 13;
+      // repeated int32 target_to = 13;
       case 13: {
         if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag) ==
             ::google::protobuf::internal::WireFormatLite::WIRETYPE_VARINT) {
          parse_target_to:
           DO_((::google::protobuf::internal::WireFormatLite::ReadRepeatedPrimitive<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  1, 104, input, this->mutable_target_to())));
         } else if (::google::protobuf::internal::WireFormatLite::GetTagWireType(tag)
                    == ::google::protobuf::internal::WireFormatLite::
                       WIRETYPE_LENGTH_DELIMITED) {
           DO_((::google::protobuf::internal::WireFormatLite::ReadPackedPrimitiveNoInline<
-                   ::google::protobuf::int64, ::google::protobuf::internal::WireFormatLite::TYPE_INT64>(
+                   ::google::protobuf::int32, ::google::protobuf::internal::WireFormatLite::TYPE_INT32>(
                  input, this->mutable_target_to())));
         } else {
           goto handle_uninterpreted;
@@ -1763,9 +1763,9 @@ void Instruction::SerializeWithCachedSizes(
       12, this->ext_data_name(), output);
   }
 
-  // repeated int64 target_to = 13;
+  // repeated int32 target_to = 13;
   for (int i = 0; i < this->target_to_size(); i++) {
-    ::google::protobuf::internal::WireFormatLite::WriteInt64(
+    ::google::protobuf::internal::WireFormatLite::WriteInt32(
       13, this->target_to(i), output);
   }
 
@@ -1853,10 +1853,10 @@ void Instruction::SerializeWithCachedSizes(
         12, this->ext_data_name(), target);
   }
 
-  // repeated int64 target_to = 13;
+  // repeated int32 target_to = 13;
   for (int i = 0; i < this->target_to_size(); i++) {
     target = ::google::protobuf::internal::WireFormatLite::
-      WriteInt64ToArray(13, this->target_to(i), target);
+      WriteInt32ToArray(13, this->target_to(i), target);
   }
 
   if (!unknown_fields().empty()) {
@@ -1957,12 +1957,12 @@ int Instruction::ByteSize() const {
     }
 
   }
-  // repeated int64 target_to = 13;
+  // repeated int32 target_to = 13;
   {
     int data_size = 0;
     for (int i = 0; i < this->target_to_size(); i++) {
       data_size += ::google::protobuf::internal::WireFormatLite::
-        Int64Size(this->target_to(i));
+        Int32Size(this->target_to(i));
     }
     total_size += 1 * this->target_to_size() + data_size;
   }
