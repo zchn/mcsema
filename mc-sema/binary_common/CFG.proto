@@ -8,6 +8,11 @@ message JumpTbl {
     required    int32       zero_offset = 2;
 }
 
+
+message TargetMap {
+    repeated    int32       target_to = 1;
+}
+
 message JumpIndexTbl {
     required    bytes       table_entries = 1;
     required    int32       zero_offset = 2;
@@ -26,7 +31,7 @@ message Instruction {
     optional    JumpTbl           jump_table = 10;
     optional    JumpIndexTbl      jump_index_table = 11;
     optional    string            ext_data_name = 12;
-    repeated	int32 	  	  target_to = 13; 	
+    optional	TargetMap 	  target_map = 13; 	
 }
 
 message Block {

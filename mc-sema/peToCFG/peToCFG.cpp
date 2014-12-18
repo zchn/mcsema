@@ -327,18 +327,17 @@ InstPtr deserializeInst(const ::Instruction &inst, LLVMByteDecoder &decoder)
   }
 
 
-  if(inst.has_target_to()) {
+  if(inst.has_target_map()) {
 
-    cout << "OK\n" ;
+    cout << "OK --------------------------------------------- \n" ;
+    const ::TargetMap &jmp_map = inst.target_map();
+
+    for(int i = 0; i < jmp_map.target_to_size(); i++) {
+      ip->set_resolved_jump_tgt(jmp_map.target_to(i));
+    }
+
+
   }
-
-  // if(inst.has_referered_from()) {
-  //     // create new label that branch can refered to for jumps
-  //   //      JumpTable *jmp = new JumpTable(table_entries, jmp_tbl.zero_offset());
-  //   //ip->set_jump_table(JumpTablePtr(jmp));
-  // }
-
-
 
   if(inst.has_jump_index_table()) {
       // create new jump table
@@ -817,6 +816,7 @@ static void instFromNatInst(InstPtr i, ::Instruction *protoInst) {
 
   if(i->has_jump_table()) {
       JumpTablePtr native_jmp = i->get_jump_table();
+
       ::JumpTbl *proto_jmp = protoInst->mutable_jump_table();
       const vector<VA>& the_table = native_jmp->getJumpTable();
 
@@ -843,10 +843,13 @@ static void instFromNatInst(InstPtr i, ::Instruction *protoInst) {
 
     const vector<VA>& the_targets = i->resolved_targets;
     vector<VA>::const_iterator it = the_targets.begin();
+
+      ::TargetMap *proto_jmp = protoInst->mutable_target_map();
+
     while(it != the_targets.end()) {
       int32_t jmp_t = *it;
       cout << jmp_t << "\n";
-      protoInst->add_target_to(jmp_t);
+      proto_jmp->add_target_to(jmp_t);
       ++it;
     }
 
