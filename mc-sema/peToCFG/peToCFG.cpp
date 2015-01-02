@@ -322,8 +322,8 @@ InstPtr deserializeInst(const ::Instruction &inst, LLVMByteDecoder &decoder)
           table_entries.push_back(jmp_tbl.table_entries(i));
       }
       
-      JumpTable *jmp = new JumpTable(table_entries, jmp_tbl.zero_offset());
-      ip->set_jump_table(JumpTablePtr(jmp));
+      MCSJumpTable *jmp = new MCSJumpTable(table_entries, jmp_tbl.zero_offset());
+      ip->set_jump_table(MCSJumpTablePtr(jmp));
   }
 
 
@@ -348,6 +348,14 @@ InstPtr deserializeInst(const ::Instruction &inst, LLVMByteDecoder &decoder)
       
       JumpIndexTable *idx = new JumpIndexTable(tbl_bytes, idx_tbl.zero_offset());
       ip->set_jump_index_table(JumpIndexTablePtr(idx));
+  }
+
+  if(inst.has_system_call_number()) {
+      ip->set_system_call_number(inst.system_call_number());
+  }
+
+  if(inst.has_local_noreturn()) {
+      ip->set_local_noreturn();
   }
 
   return ip;
@@ -631,6 +639,8 @@ NativeModulePtr readModule( std::string         fName,
         case ProtoBuff:
             m = readProtoBuf(fName);
             break;
+        default:
+            LASSERT(false, "NOT IMPLEMENTED");
     }
 
     return m;
@@ -815,7 +825,10 @@ static void instFromNatInst(InstPtr i, ::Instruction *protoInst) {
   protoInst->set_reloc_offset(i->get_reloc_offset());
 
   if(i->has_jump_table()) {
-      JumpTablePtr native_jmp = i->get_jump_table();
+    //      JumpTablePtr native_jmp = i->get_jump_table();
+
+
+      MCSJumpTablePtr native_jmp = i->get_jump_table();
 
       ::JumpTbl *proto_jmp = protoInst->mutable_jump_table();
       const vector<VA>& the_table = native_jmp->getJumpTable();
