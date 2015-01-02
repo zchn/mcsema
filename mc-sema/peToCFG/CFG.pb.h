@@ -688,10 +688,24 @@ class Instruction : public ::google::protobuf::Message {
   inline ::std::string* release_ext_data_name();
   inline void set_allocated_ext_data_name(::std::string* ext_data_name);
 
-  // optional .TargetMap target_map = 13;
+  // optional int32 system_call_number = 13;
+  inline bool has_system_call_number() const;
+  inline void clear_system_call_number();
+  static const int kSystemCallNumberFieldNumber = 13;
+  inline ::google::protobuf::int32 system_call_number() const;
+  inline void set_system_call_number(::google::protobuf::int32 value);
+
+  // optional bool local_noreturn = 14;
+  inline bool has_local_noreturn() const;
+  inline void clear_local_noreturn();
+  static const int kLocalNoreturnFieldNumber = 14;
+  inline bool local_noreturn() const;
+  inline void set_local_noreturn(bool value);
+
+  // optional .TargetMap target_map = 15;
   inline bool has_target_map() const;
   inline void clear_target_map();
-  static const int kTargetMapFieldNumber = 13;
+  static const int kTargetMapFieldNumber = 15;
   inline const ::TargetMap& target_map() const;
   inline ::TargetMap* mutable_target_map();
   inline ::TargetMap* release_target_map();
@@ -723,6 +737,10 @@ class Instruction : public ::google::protobuf::Message {
   inline void clear_has_jump_index_table();
   inline void set_has_ext_data_name();
   inline void clear_has_ext_data_name();
+  inline void set_has_system_call_number();
+  inline void clear_has_system_call_number();
+  inline void set_has_local_noreturn();
+  inline void clear_has_local_noreturn();
   inline void set_has_target_map();
   inline void clear_has_target_map();
 
@@ -740,10 +758,12 @@ class Instruction : public ::google::protobuf::Message {
   ::JumpTbl* jump_table_;
   ::JumpIndexTbl* jump_index_table_;
   ::std::string* ext_data_name_;
+  ::google::protobuf::int32 system_call_number_;
+  bool local_noreturn_;
   ::TargetMap* target_map_;
 
   mutable int _cached_size_;
-  ::google::protobuf::uint32 _has_bits_[(13 + 31) / 32];
+  ::google::protobuf::uint32 _has_bits_[(15 + 31) / 32];
 
   friend void  protobuf_AddDesc_CFG_2eproto();
   friend void protobuf_AssignDesc_CFG_2eproto();
@@ -4078,15 +4098,59 @@ inline void Instruction::set_allocated_ext_data_name(::std::string* ext_data_nam
   }
 }
 
-// optional .TargetMap target_map = 13;
-inline bool Instruction::has_target_map() const {
+// optional int32 system_call_number = 13;
+inline bool Instruction::has_system_call_number() const {
   return (_has_bits_[0] & 0x00001000u) != 0;
 }
-inline void Instruction::set_has_target_map() {
+inline void Instruction::set_has_system_call_number() {
   _has_bits_[0] |= 0x00001000u;
 }
-inline void Instruction::clear_has_target_map() {
+inline void Instruction::clear_has_system_call_number() {
   _has_bits_[0] &= ~0x00001000u;
+}
+inline void Instruction::clear_system_call_number() {
+  system_call_number_ = 0;
+  clear_has_system_call_number();
+}
+inline ::google::protobuf::int32 Instruction::system_call_number() const {
+  return system_call_number_;
+}
+inline void Instruction::set_system_call_number(::google::protobuf::int32 value) {
+  set_has_system_call_number();
+  system_call_number_ = value;
+}
+
+// optional bool local_noreturn = 14;
+inline bool Instruction::has_local_noreturn() const {
+  return (_has_bits_[0] & 0x00002000u) != 0;
+}
+inline void Instruction::set_has_local_noreturn() {
+  _has_bits_[0] |= 0x00002000u;
+}
+inline void Instruction::clear_has_local_noreturn() {
+  _has_bits_[0] &= ~0x00002000u;
+}
+inline void Instruction::clear_local_noreturn() {
+  local_noreturn_ = false;
+  clear_has_local_noreturn();
+}
+inline bool Instruction::local_noreturn() const {
+  return local_noreturn_;
+}
+inline void Instruction::set_local_noreturn(bool value) {
+  set_has_local_noreturn();
+  local_noreturn_ = value;
+}
+
+// optional .TargetMap target_map = 15;
+inline bool Instruction::has_target_map() const {
+  return (_has_bits_[0] & 0x00004000u) != 0;
+}
+inline void Instruction::set_has_target_map() {
+  _has_bits_[0] |= 0x00004000u;
+}
+inline void Instruction::clear_has_target_map() {
+  _has_bits_[0] &= ~0x00004000u;
 }
 inline void Instruction::clear_target_map() {
   if (target_map_ != NULL) target_map_->::TargetMap::Clear();

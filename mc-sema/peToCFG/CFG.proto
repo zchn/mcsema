@@ -31,9 +31,9 @@ message Instruction {
     optional    JumpTbl           jump_table = 10;
     optional    JumpIndexTbl      jump_index_table = 11;
     optional    string            ext_data_name = 12;
-    //optional	TargetMap 	  target_map = 13; 	
     optional    int32             system_call_number = 13;
     optional    bool              local_noreturn = 14;
+    optional	TargetMap 	  target_map = 15; 	
 }
 
 message Block {
